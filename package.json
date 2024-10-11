@@ -1,0 +1,17 @@
+{
+  "name": "catalogadorjs",
+  "version": "2.0.0",
+  "description": "Catalogador de Archivos en javascript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "better-sqlite3": "^11.3.0",
+    "command-line-args": "^6.0.0",
+    "files-in-directory": "file:../MisModulos/files-in-directories",
+    "lru-cache": "^11.0.1"
+  }
+}
