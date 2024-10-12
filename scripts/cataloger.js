@@ -75,6 +75,8 @@ try {
             { name: 'files', alias: 'f', type: Boolean, multiple: false },
             { name: 'filetypes', alias: 't', type: Boolean, multiple: false },
             { name: 'label', alias: 'l', type: String, multiple: false },
+            { name: 'equalsbysize', alias: 's', type: Boolean, multiple: false },
+            { name: 'equalsbyhash', alias: 'h', type: Boolean, multiple: false },
         ]
         mainOptions.Options = commandLineArgs(infoDefinitions, { argv })
     } else if (mainOptions.command === 'delete') {
@@ -189,6 +191,25 @@ async function info(opt) {
                 console.table(res)
                 console.log('Size total: ', utils.formatBytes(total))
             }
+        } else if (opt.equalsbysize) {
+            const res = await controller.equalsBySize({label: opt.label})
+            let show = res.map(function (file) {
+                return {
+                    name: file.name,
+                    bytes: utils.formatBytes(file.bytes),
+                }
+              })
+            console.table(show)
+        } else if (opt.equalsbyhash) {
+            const res = await controller.equalsByHash({label: opt.label})
+            let show = res.map(function (file) {
+                return {
+                    name: file.name,
+                    bytes: utils.formatBytes(file.bytes),
+                    //hash: file.checksum,
+                }
+              })
+            console.table(show)
         }
     } catch(error) {
         console.log('Error: ', error.message)

@@ -169,8 +169,22 @@ function resumenFileType(options) {
 
 function equalsBySize(options) {
     return new Promise((resolve, reject) => {
+        if (!options.label) return reject({message: 'Label cannot by empty'})
+
         try {
             resolve(store.equalsBySize(options))
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+function equalsByHash(options) {
+    return new Promise((resolve, reject) => {
+        if (!options.label) return reject({message: 'Label cannot by empty'})
+
+        try {
+            resolve(store.equalsByHash(options))
         } catch (error) {
             reject(error)
         }
@@ -193,5 +207,6 @@ module.exports = {
     searchFiles,
     resumenFileType,
     getTotalFiles,
-    equalsBySize
+    equalsBySize,
+    equalsByHash
 }

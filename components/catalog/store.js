@@ -419,11 +419,12 @@ function resumenFileType(options) {
 }
 
 function equalsBySize (options) {
+    
     try {
-        const stmEqualsBySize =  Model.prepare('\
+        const stmEqualsBySize =  Model.prepare("\
         SELECT \
             d.name || '/' || c.name as name,\
-            c.bytes\
+            c.bytes \
         FROM \
             catalog c \
         INNER JOIN \
@@ -447,9 +448,50 @@ function equalsBySize (options) {
                     COUNT(*) > 1\
                 )\
         ORDER BY \
-            c.bytes DESC;')
+            c.bytes DESC \
+        LIMIT 500")
 
-        return stmEqualsBySize.get(options.label)
+        return stmEqualsBySize.all(options.label, options.label)
+    } catch (error) {
+        throw customError(error)
+    }
+}
+
+function equalsByHash (options) {
+    
+    try {
+        const stmEqualsBySize =  Model.prepare("\
+        SELECT \
+            d.name || '/' || c.name as name,\
+            c.checksum, \
+            c.bytes \
+        FROM \
+            catalog c \
+        INNER JOIN \
+            directory d ON c.directoryid = d.id \
+        INNER JOIN \
+            label l ON c.labelid = l.id \
+        WHERE \
+            l.name = ? AND \
+            c.checksum IN (\
+                SELECT \
+                    c2.checksum \
+                FROM \
+                    catalog c2 \
+                INNER JOIN \
+                    label l2 on c2.labelid = l2.id \
+                WHERE \
+                    l2.name = ? \
+                GROUP BY \
+                    c2.checksum \
+                HAVING \
+                    COUNT(*) > 1\
+                )\
+        ORDER BY \
+            c.checksum DESC \
+        LIMIT 500")
+
+        return stmEqualsBySize.all(options.label, options.label)
     } catch (error) {
         throw customError(error)
     }
@@ -470,5 +512,6 @@ module.exports = {
     closePreparedCatalog,
     searchFiles,
     resumenFileType,
-    equalsBySize
+    equalsBySize,
+    equalsByHash
 }
