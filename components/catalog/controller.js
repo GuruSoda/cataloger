@@ -23,6 +23,7 @@ function getCatalog (label, directory) {
 
 function getDataFile (file, options) {
     return new Promise((resolve, reject) => {
+        if (!options.label) return reject({message: 'Label cannot by empty'})
 
         try {
             const parsed = path.parse(file)
@@ -42,6 +43,7 @@ function getDataFile (file, options) {
 
 function updateDataFile (dataFile) {
     return new Promise((resolve, reject) => {
+        if (!dataFile.label) return reject({message: 'Label cannot by empty'})
 
         try {
             resolve(store.update(dataFile))
@@ -63,6 +65,8 @@ function deleteLabel (label) {
 
 function deleteDirectory (label, directory) {
     return new Promise((resolve, reject) => {
+        if (!label) return reject({message: 'Label cannot by empty'})
+
         try {
             resolve(store.deleteDirectory(label, directory))
         } catch (error) {
@@ -73,6 +77,7 @@ function deleteDirectory (label, directory) {
 
 function deleteFile (id, label) {
     return new Promise((resolve, reject) => {
+        if (!label) return reject({message: 'Label cannot by empty'})
 
         try {
             resolve(store.deleteFile(id, label))
@@ -134,6 +139,7 @@ function closePreparedCatalog(options) {
 
 function getTotalFiles(options) {
     return new Promise((resolve, reject) => {
+        if (!options.label) return reject({message: 'Label cannot by empty'})
         try {
             resolve(store.getTotalFiles(options))
         } catch (error) {

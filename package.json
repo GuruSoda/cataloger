@@ -1,6 +1,6 @@
 {
   "name": "catalogadorjs",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Catalogador de Archivos en javascript",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,7 @@
   "dependencies": {
     "better-sqlite3": "^11.3.0",
     "command-line-args": "^6.0.0",
+    "command-line-usage": "^7.0.3",
     "files-in-directory": "file:../MisModulos/files-in-directories",
     "lru-cache": "^11.0.1"
   }

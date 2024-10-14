@@ -1,102 +1,19 @@
 const db = require('../db').conectar('./database/catalog.sqlite3')
 const controller = require('../components/catalog/controller')
-const commandLineArgs =  require('command-line-args')
+const parseOptions = require('./parsearg')
 const findFiles = require('files-in-directory')
 const path = require('path')
 const fs = require('fs')
 const utils = require('./utils')
 
-// Ejemplos de uso:
-// catalog.js --help
-// catalog.js create --nombre=... --directorio=...
-// catalog.js search --str=...
-// catalog.js update --label=... 
-
 let mainOptions
 
-// https://github.com/chalk/chalk
-// https://github.com/75lb/command-line-usage
-// https://github.com/75lb/command-line-usage/wiki
 try {
-    /* first - parse the main command */
-    const mainDefinitions = [
-        { name: 'command', defaultOption: true },
-        { name: 'help', alias: 'h', type: Boolean }
-    ]
-
-    mainOptions = commandLineArgs(mainDefinitions, { stopAtFirstUnknown: true })
-    const argv = mainOptions._unknown || []
-    
-    /* second - parse the merge command options */
-    if (mainOptions.command === 'check') {
-        const checkDefinitions = [
-            { name: 'verbose', alias: 'v', type: Boolean },
-            { name: 'directory', alias: 'd', type: String, multiple: false },
-            { name: 'label', alias: 'l', type: String, multiple: false },
-            { name: 'showmissing', alias: 'm', type: Boolean, multiple: false, defaultValue: true },
-            { name: 'showexists', alias: 'e', type: Boolean, multiple: false, defaultValue: false },
-            { name: 'onlyfs', alias: 'f', type: Boolean, multiple: false, defaultValue: false },
-            { name: 'onlydb', alias: 'b', type: Boolean, multiple: false, defaultValue: false },
-        ]
-        mainOptions.Options = commandLineArgs(checkDefinitions, { argv })
-    } else if (mainOptions.command === 'update') {
-        const updateDefinitions = [
-            { name: 'verbose', alias: 'v', type: Boolean },
-            { name: 'directory', alias: 'd', type: String, multiple: false },
-            { name: 'label', alias: 'l', type: String, multiple: false },
-            { name: 'hash', alias: 'h', type: Boolean, multiple: false, defaultValue: false },
-            { name: 'showmissing', alias: 'm', type: Boolean, multiple: false, defaultValue: true },
-            { name: 'showexists', alias: 'e', type: Boolean, multiple: false, defaultValue: false },
-            { name: 'onlyfs', alias: 'f', type: Boolean, multiple: false, defaultValue: false },
-            { name: 'onlydb', alias: 'b', type: Boolean, multiple: false, defaultValue: false },
-        ]
-        mainOptions.Options = commandLineArgs(updateDefinitions, { argv })
-    } else if (mainOptions.command === 'create') {
-        const createDefinitions = [
-            { name: 'verbose', alias: 'v', type: Boolean },
-            { name: 'directory', alias: 'd', type: String, multiple: false },
-            { name: 'label', alias: 'l', type: String, multiple: false },
-            { name: 'wildard', alias: 'w', type: String, multiple: false },
-            { name: 'hash', alias: 'h', type: Boolean, multiple: false },
-            { name: 'bulk', alias: 'b', type: Boolean, multiple: true },
-        ]
-        mainOptions.Options = commandLineArgs(createDefinitions, { argv })
-    } else if (mainOptions.command === 'search') {
-        const searchDefinitions = [
-            { name: 'verbose', alias: 'v', type: Boolean },
-            { name: 'directory', alias: 'd', type: String, multiple: false },
-            { name: 'label', alias: 'l', type: String, multiple: false },
-            { name: 'str', alias: 's', type: String, multiple: false },
-        ]
-        mainOptions.Options = commandLineArgs(searchDefinitions, { argv })
-    } else if (mainOptions.command === 'info') {
-        const infoDefinitions = [
-            { name: 'verbose', alias: 'v', type: Boolean },
-            { name: 'files', alias: 'f', type: Boolean, multiple: false },
-            { name: 'filetypes', alias: 't', type: Boolean, multiple: false },
-            { name: 'label', alias: 'l', type: String, multiple: false },
-            { name: 'equalsbysize', alias: 's', type: Boolean, multiple: false },
-            { name: 'equalsbyhash', alias: 'h', type: Boolean, multiple: false },
-        ]
-        mainOptions.Options = commandLineArgs(infoDefinitions, { argv })
-    } else if (mainOptions.command === 'delete') {
-        const deleteDefinitions = [
-            { name: 'verbose', alias: 'v', type: Boolean },
-            { name: 'file', alias: 'f', type: String, multiple: false },
-            { name: 'directory', alias: 'd', type: String, multiple: false },
-            { name: 'label', alias: 'l', type: String, multiple: false },
-        ]
-        mainOptions.Options = commandLineArgs(deleteDefinitions, { argv })
-    } else {
-        console.log('Unknown option: ', mainOptions.command)
-        return 2
-    }
+    mainOptions = parseOptions()
 } catch (e) {
     console.log(e.message)
-    return 1
+    return e.code
 }
-
-// console.log('mainOptions:', mainOptions)
 
 switch (mainOptions.command) {
     case 'create':
@@ -210,6 +127,8 @@ async function info(opt) {
                 }
               })
             console.table(show)
+        } else {
+            console.log('Missing task')
         }
     } catch(error) {
         console.log('Error: ', error.message)
@@ -217,6 +136,12 @@ async function info(opt) {
 }
 
 async function update(opt) {
+
+    if (!opt.directory) {
+        console.log('Missing --directory <dir>')
+        return 
+    }
+
     opt.exists = opt.showexists
     opt.missing = opt.showmissing
 
@@ -243,6 +168,7 @@ async function remove(opt) {
             const infoFile = await controller.getFile(path.join(opt.directory, opt.file), { label: opt.label })
             await controller.deleteFile(infoFile.id, opt.label)
         }
+
     } catch (error) {
         console.log('Error: ', error.message)        
     }

@@ -122,7 +122,6 @@ function getCatalog (options) {
 }
 
 function updateFile(dataFile) {
-
     try {
         const stmUpdateFile =  Model.prepare('\
             UPDATE catalog \
@@ -317,6 +316,7 @@ function prepareUpdateCatalog(options) {
                 WHERE \
                     l.name = '${options.label}';`
 
+                    
         Model.exec(stmCreateAndInsertV2)
 
         return tableName
@@ -488,7 +488,7 @@ function equalsByHash (options) {
                     COUNT(*) > 1\
                 )\
         ORDER BY \
-            c.checksum DESC \
+            c.bytes DESC \
         LIMIT 500")
 
         return stmEqualsBySize.all(options.label, options.label)
