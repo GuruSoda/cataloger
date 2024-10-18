@@ -88,7 +88,7 @@ function msgHelpByCommand(command) {
     }
 
     switch(command) {
-        case 'check':
+        case 'verify':
             resumen.content = `Ayuda de ${command}`
             message = msgErrorCommand(checkDefinitions, resumen)
             break
@@ -117,7 +117,7 @@ function msgHelpByCommand(command) {
             message = msgErrorCommand(helpDefinitions, resumen)
             break
         default:
-            message = 'Missing valid command.'
+            message = 'Missing command.'
             break
     }
 
@@ -139,7 +139,7 @@ function helpGeneral () {
           content: [
             { name: 'help', summary: 'Display this help.' },
             { name: 'create', summary: 'Create a new Catalog.' },
-            { name: 'check', summary: 'Check a Catalog.' },
+            { name: 'verify', summary: 'Verify files in a Catalog.' },
             { name: 'search', summary: 'Search files into a Catalog.' },
             { name: 'info', summary: 'Print Information about a Catalog.' },
             { name: 'update', summary: 'Update a Catalog.' },
@@ -169,7 +169,7 @@ function parseArgs () {
         const argv = mainOptions._unknown || []
         
         /* second - parse the merge command options */
-        if (mainOptions.command === 'check') {
+        if (mainOptions.command === 'verify') { // verify?
             mainOptions.Options = commandLineArgs(checkDefinitions, { argv })
         } else if (mainOptions.command === 'update') {
             mainOptions.Options = commandLineArgs(updateDefinitions, { argv })

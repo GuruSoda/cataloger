@@ -19,8 +19,8 @@ switch (mainOptions.command) {
     case 'create':
         create(mainOptions.Options)
         break
-    case 'check':
-        check(mainOptions.Options)
+    case 'verify':
+        verify(mainOptions.Options)
         break
     case 'search':
         search(mainOptions.Options)
@@ -65,7 +65,7 @@ async function create(opt) {
     }
 }
 
-function check(opt) {
+function verify(opt) {
     opt.exists = opt.showexists
     opt.missing = opt.showmissing
 
@@ -188,10 +188,10 @@ async function checkfs (opt) {
 
             if (o) {
                 const date = new Date(it.stat().mtime).getTime()
-                if (o.date !== date || o.bytes !== it.stat().size) {
+                if ((o.date !== date || o.bytes !== it.stat().size) || (opt.hash === true && !o.checksum)) {
                     try {
                         if (opt.update) {
-                            let infoFile = await extractInfoFile({path: it.path, hash: (o.checksum) ? true : false})
+                            let infoFile = await extractInfoFile({path: it.path, hash: (o.checksum || opt.hash) ? true : false})
                             infoFile.id = o.id
                             infoFile.label = o.label
                             await controller.updateFile(infoFile)
@@ -254,7 +254,7 @@ async function checkdb(options) {
 
                     if (options.update) {
                         const date = new Date(stat.mtime).getTime()
-                        if (file.date !== date || file.bytes !== stat.size) {
+                        if ((file.date !== date || file.bytes !== stat.size) || (opt.hash === true && !o.checksum)) {
 
                             toUpdate = {
                                 date: date,
