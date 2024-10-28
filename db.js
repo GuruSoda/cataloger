@@ -29,10 +29,14 @@ function conectar (filedb) {
 
         const resp = new RegExp(regex).exec(text)
 
-//        if (!resp) console.log('regexp null text :', text)
+        if (!resp) console.log('Not Match:', regex, ' - ', text)
 
-        if (resp && resp[0].length === text.length) //console.log('sin extension text :', text, ' resp:', resp)
-            return ''
+//            console.log(resp)
+
+        // if (resp && resp[0].length === text.length) { //console.log('sin extension text :', text, ' resp:', resp)
+        //     console.log(resp)
+        //     return ''
+        // }
 
         return resp ? resp[0] : ''
     });

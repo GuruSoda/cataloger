@@ -26,6 +26,7 @@ const updateDefinitions = [
     { name: 'showexists', alias: 'e', type: Boolean, multiple: false, defaultValue: false },
     { name: 'onlyfs', alias: 'f', type: Boolean, multiple: false, defaultValue: false },
     { name: 'onlydb', alias: 'b', type: Boolean, multiple: false, defaultValue: false },
+    { name: 'cleanemptydirectories', alias: 'c', type: Boolean, multiple: false, defaultValue: false },
 ]
 
 const createDefinitions = [
@@ -50,7 +51,9 @@ const infoDefinitions = [
     { name: 'filetypes', alias: 't', type: Boolean, multiple: false },
     { name: 'label', alias: 'l', type: String, multiple: false },
     { name: 'equalsbysize', alias: 's', type: Boolean, multiple: false },
-    { name: 'equalsbyhash', alias: 'h', type: Boolean, multiple: false, description: 'es una descripcion' },
+    { name: 'equalsbyhash', alias: 'c', type: Boolean, multiple: false, description: 'es una descripcion' },
+    { name: 'list', type: Boolean, multiple: false, description: 'List size of subdirectories' },
+    { name: 'directory', alias: 'd', type: String, multiple: false },
 ]
 
 const deleteDefinitions = [

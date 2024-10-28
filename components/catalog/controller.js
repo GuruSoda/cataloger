@@ -197,6 +197,29 @@ function equalsByHash(options) {
     })
 }
 
+function deleteEmptyDirectories(options) {
+    return new Promise((resolve, reject) => {
+        try {
+            resolve(store.deleteEmptyDirectories(options))
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
+function sizeSubDirectories(options) {
+    return new Promise((resolve, reject) => {
+        if (!options.label) return reject({message: 'Label cannot by empty'})
+        if (!options.directory) return reject({message: 'Directory cannot by empty'})
+
+        try {
+            resolve(store.sizeSubDirectories(options))
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
+
 module.exports = { 
     add, 
     getFile:getDataFile, 
@@ -214,5 +237,7 @@ module.exports = {
     resumenFileType,
     getTotalFiles,
     equalsBySize,
-    equalsByHash
+    equalsByHash,
+    deleteEmptyDirectories,
+    sizeSubDirectories
 }

@@ -275,24 +275,6 @@ function prepareUpdateCatalog(options) {
     try {
         const tableName = randonTableName()
 
-        // const stmCreateAndInsert = Model.prepare(`\
-        //     CREATE TEMPORARY TABLE ${tableName} AS \
-        //     SELECT \
-        //         c.id,\
-        //         dir.name || '/' || c.name as path,\
-        //         c.date,\
-        //         c.bytes \
-        //     FROM \
-        //         catalog c \
-        //     INNER JOIN \
-        //         directory dir  on c.directoryid = dir.id \
-        //     INNER JOIN \
-        //         label l on c.labelid = l.id \
-        //     WHERE \
-        //         l.name = ?`)
-
-        // stmCreateAndInsert.run(options.label)
-
         const stmCreateAndInsertV2 = `\
             CREATE TEMPORARY TABLE ${tableName} (\
                 id integer not null,
@@ -315,7 +297,6 @@ function prepareUpdateCatalog(options) {
                     label l on c.labelid = l.id \
                 WHERE \
                     l.name = '${options.label}';`
-
                     
         Model.exec(stmCreateAndInsertV2)
 
@@ -393,9 +374,9 @@ function searchFiles(options) {
 
 function resumenFileType(options) {
     try {
-        const stmSeachFiles =  Model.prepare("\
+        const stmResumenFileType =  Model.prepare("\
             SELECT \
-                regexp_substr('\.[0-9a-zA-Z_\S]+$', c.name) as extension, sum(c.bytes) as bytes, count(c.id) as cantidad \
+                regexp_substr('[\\.]*[\\w\\W\\S][^\\.]+$', c.name) as extension, sum(c.bytes) as bytes, count(c.id) as cantidad \
             FROM \
                 catalog c \
             INNER JOIN \
@@ -412,7 +393,7 @@ function resumenFileType(options) {
                 cantidad DESC \
             LIMIT 500")
 
-        return stmSeachFiles.all(options.label)
+        return stmResumenFileType.all(options.label)
     } catch (error) {
         throw customError(error)
     }
@@ -497,6 +478,74 @@ function equalsByHash (options) {
     }
 }
 
+function deleteEmptyDirectories (options) {
+    try {
+        const stmDeleteEmptyDirectories =  Model.prepare('\
+            DELETE from directory \
+            WHERE \
+                id in ( \
+                    SELECT \
+                        dir.id \
+                    FROM \
+                        directory dir \
+                    LEFT JOIN \
+                        catalog c on c.directoryid = dir.id \
+                    WHERE \
+                        c.directoryid is NULL \
+                    )')
+        return stmDeleteEmptyDirectories.run()
+    } catch (error) {
+        throw customError(error)
+    }
+}
+
+function sizeSubDirectories (options) {
+
+    try {
+        const stmSizeSubDirectoriesV2 =  Model.prepare("\
+            SELECT \
+                regexp_substr('/[\\w\\W\\s][^/]+$', directories.name) as directory, \
+                ( \
+                SELECT \
+                    sum(c.bytes) as bytes \
+                FROM \
+                    catalog c \
+                INNER JOIN \
+                    directory dir2 on c.directoryid = dir2.id \
+                INNER JOIN \
+                    label l on c.labelid = l.id \
+                WHERE \
+                    dir2.name || '/' || c.name like directories.name || '/%' \
+                    and l.name = ? \
+                ) as size, \
+                ( \
+                SELECT \
+                    count(c.id) \
+                FROM \
+                    catalog c \
+                INNER JOIN \
+                    directory dir3 on c.directoryid = dir3.id \
+                INNER JOIN \
+                    label l on c.labelid = l.id \
+                WHERE \
+                    dir3.name || '/' || c.name like directories.name || '/%' \
+                    and l.name = ? \
+                ) as files \
+            FROM \
+                ( \
+                 select distinct(regexp_substr('^" + options.directory +"[\\w\\W\\S][^/]+', name)) as name \
+                 from directory \
+                 where name like ? || '%' \
+                ) as directories \
+            ORDER BY size DESC")
+
+        const out = stmSizeSubDirectoriesV2.all(options.label, options.label, options.directory)
+        return out
+    } catch (error) {
+        throw customError(error)
+    }
+}
+
 module.exports = { 
     add,
     get:getFile,
@@ -513,5 +562,7 @@ module.exports = {
     searchFiles,
     resumenFileType,
     equalsBySize,
-    equalsByHash
+    equalsByHash,
+    deleteEmptyDirectories,
+    sizeSubDirectories
 }

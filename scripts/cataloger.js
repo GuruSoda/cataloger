@@ -106,7 +106,7 @@ async function info(opt) {
                     total =  total + file.bytes
                 }
                 console.table(res)
-                console.log('Size total: ', utils.formatBytes(total))
+                console.log('Size: ', utils.formatBytes(total))
             }
         } else if (opt.equalsbysize) {
             const res = await controller.equalsBySize({label: opt.label})
@@ -127,6 +127,22 @@ async function info(opt) {
                 }
               })
             console.table(show)
+        } if (opt.list) {
+            const res = await controller.sizeSubDirectories({label: opt.label, directory: opt.directory})
+            let size = 0
+            let files = 0
+            let show = res.map(function (dir) {
+                size = size + (dir.size ? dir.size : 0)
+                files = files + (dir.files ? dir.files : 0)
+                return {
+                    name: dir.directory,
+                    bytes: dir.size ? utils.formatBytes(dir.size) : 0,
+                    files: dir.files || 0,
+                }
+              })
+            console.table(show)
+            console.log('Size: ', utils.formatBytes(size))
+            console.log('Files: ', files)
         } else {
             console.log('Missing task')
         }
@@ -136,6 +152,11 @@ async function info(opt) {
 }
 
 async function update(opt) {
+
+    if (opt.cleanemptydirectories) {
+        await controller.deleteEmptyDirectories()
+        return
+    }
 
     if (!opt.directory) {
         console.log('Missing --directory <dir>')
