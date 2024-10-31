@@ -127,7 +127,7 @@ async function info(opt) {
                 }
               })
             console.table(show)
-        } if (opt.list) {
+        } else if (opt.listsubdir) {
             const res = await controller.sizeSubDirectories({label: opt.label, directory: opt.directory})
             let size = 0
             let files = 0
@@ -135,12 +135,58 @@ async function info(opt) {
                 size = size + (dir.size ? dir.size : 0)
                 files = files + (dir.files ? dir.files : 0)
                 return {
-                    name: dir.directory,
+                    name: dir.name,
                     bytes: dir.size ? utils.formatBytes(dir.size) : 0,
                     files: dir.files || 0,
                 }
               })
-            console.table(show)
+            console.table(show, ["name", "bytes", "files"])
+            console.log('Size: ', utils.formatBytes(size))
+            console.log('Files: ', files)
+        } else if (opt.listfiles) {
+            const res = await controller.filesInDirectory({label: opt.label, directory: opt.directory})
+            let size = 0
+            let files = 0
+            let show = res.map(function (file) {
+                size = size + file.size
+                files++
+                return {
+                    id: file.id,
+                    name: file.name,
+                    bytes: utils.formatBytes(file.size)
+                }
+              })
+            console.table(show, ["name", "bytes", "id"])
+            console.log('Size: ', utils.formatBytes(size))
+            console.log('Files: ', files)
+        } else if (opt.list) {
+            let res = await controller.sizeSubDirectories({label: opt.label, directory: opt.directory})
+            let size = 0
+            let files = 0
+            let show = []
+
+            for (const dir of res) {
+                size = size + (dir.size ? dir.size : 0)
+                files = files + (dir.files ? dir.files : 0)
+                show.push({
+                        name: dir.name + '/',
+                        bytes: dir.size ? utils.formatBytes(dir.size) : 0,
+                        filesOrID: dir.files || 0
+                    })
+            }
+
+            res = await controller.filesInDirectory({label: opt.label, directory: opt.directory})
+            for (const file of res) {
+                size = size + (file.size ? file.size : 0)
+                files++
+                show.push({
+                        name: file.name,
+                        bytes: file.size ? utils.formatBytes(file.size) : 0,
+                        filesOrID: file.id
+                    })
+            }
+
+            console.table(show, ["name", "bytes", "filesOrID"])
             console.log('Size: ', utils.formatBytes(size))
             console.log('Files: ', files)
         } else {

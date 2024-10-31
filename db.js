@@ -22,14 +22,42 @@ function conectar (filedb) {
     // regexp_replace
 
     db.function('regexp', { deterministic: true }, (regex, text) => {
-        return new RegExp(regex).test(text) ? 1 : 0
+//        console.log('regex:', regex, ' - text:', text)
+//        console.log('regex:', regex)
+        // if (text === '/mnt/Juegos/Computer/Sinclair - ZX Spectrum CD/_ReadMe_.txt') {
+        //     console.log('Encontrado!')
+
+        //     console.log('regex:', regex, ' - text:', text)
+
+        //     const out = new RegExp(regex).test(text) ? 1 : 0
+
+        //     if (out) {
+        //         console.log('Si a la regexp')
+        //     } else {
+        //         console.log('NO a la regexp')
+        //     }
+        // }
+
+        const out = new RegExp(regex).test(text) ? 1 : 0
+        // if (out)
+        //     console.log('SI regex:', regex, ' - text:', text)
+        // else
+        //     console.log('NO regex:', regex, ' - text:', text)
+
+        return out
       });
       
     db.function('regexp_substr', { deterministic: true }, (regex, text) => {
 
+//        console.log('regexp_substr:', regex, ' - text:', text)
+
         const resp = new RegExp(regex).exec(text)
 
-        if (!resp) console.log('Not Match:', regex, ' - ', text)
+//        console.log(resp[0])
+
+//        if (!resp) console.log('Not Match:', regex, ' - ', text)
+
+//        if (text === '/mnt/Juegos/Computer/GameBase64 v12.torrent') console.log('lo encontre!')
 
 //            console.log(resp)
 

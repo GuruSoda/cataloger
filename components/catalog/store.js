@@ -504,7 +504,7 @@ function sizeSubDirectories (options) {
     try {
         const stmSizeSubDirectoriesV2 =  Model.prepare("\
             SELECT \
-                regexp_substr('/[\\w\\W\\s][^/]+$', directories.name) as directory, \
+                regexp_substr('/[\\\w\\\W\\\S][^/]+$', name) as name, \
                 ( \
                 SELECT \
                     sum(c.bytes) as bytes \
@@ -528,19 +528,40 @@ function sizeSubDirectories (options) {
                 INNER JOIN \
                     label l on c.labelid = l.id \
                 WHERE \
-                    dir3.name || '/' || c.name like directories.name || '/%' \
+                    dir3.name || '/' like directories.name || '/%' \
                     and l.name = ? \
                 ) as files \
             FROM \
                 ( \
-                 select distinct(regexp_substr('^" + options.directory +"[\\w\\W\\S][^/]+', name)) as name \
+                 select distinct(regexp_substr('^" + options.directory + "[\\\w\\\W\\\S][^/]+', name)) as name \
                  from directory \
-                 where name like ? || '%' \
+                 where regexp('^" + options.directory + "', name) = 1 \
                 ) as directories \
             ORDER BY size DESC")
 
-        const out = stmSizeSubDirectoriesV2.all(options.label, options.label, options.directory)
+        const out = stmSizeSubDirectoriesV2.all(options.label, options.label)
         return out
+    } catch (error) {
+        throw customError(error)
+    }
+}
+
+function filesInDirectory(options) {
+    try {
+        const stmfilesInDirectory =  Model.prepare("\
+            SELECT \
+                f.id,f.name,f.bytes as size,f.date,f.checksum,f.description \
+            FROM \
+                catalog f \
+            INNER JOIN \
+                directory dir on f.directoryid = dir.id \
+            INNER JOIN \
+                label tag on f.labelid = tag.id \
+            WHERE \
+                tag.name = ? \
+                and dir.name || '/' = ?")
+
+        return stmfilesInDirectory.all(options.label, options.directory)
     } catch (error) {
         throw customError(error)
     }
@@ -564,5 +585,6 @@ module.exports = {
     equalsBySize,
     equalsByHash,
     deleteEmptyDirectories,
-    sizeSubDirectories
+    sizeSubDirectories,
+    filesInDirectory
 }

@@ -52,7 +52,9 @@ const infoDefinitions = [
     { name: 'label', alias: 'l', type: String, multiple: false },
     { name: 'equalsbysize', alias: 's', type: Boolean, multiple: false },
     { name: 'equalsbyhash', alias: 'c', type: Boolean, multiple: false, description: 'es una descripcion' },
-    { name: 'list', type: Boolean, multiple: false, description: 'List size of subdirectories' },
+    { name: 'listsubdir', type: Boolean, multiple: false, description: 'List size of subdirectories' },
+    { name: 'listfiles', type: Boolean, multiple: false, description: 'List files in subdirectories' },
+    { name: 'list', type: Boolean, multiple: false, description: 'List subdirectory' },
     { name: 'directory', alias: 'd', type: String, multiple: false },
 ]
 
