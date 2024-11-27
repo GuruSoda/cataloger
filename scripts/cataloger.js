@@ -118,10 +118,10 @@ async function info(opt) {
               })
             console.table(show)
         } else if (opt.equalsbyhash) {
-            const res = await controller.equalsByHash({label: opt.label})
+            const res = await controller.equalsByHash({label: opt.label, directory: opt.directory})
             let show = res.map(function (file) {
                 return {
-                    name: file.name,
+                    name: file.path,
                     bytes: utils.formatBytes(file.bytes),
                     //hash: file.checksum,
                 }

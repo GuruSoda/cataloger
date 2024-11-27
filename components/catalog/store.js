@@ -439,11 +439,11 @@ function equalsBySize (options) {
 }
 
 function equalsByHash (options) {
-    
+
     try {
         const stmEqualsBySize =  Model.prepare("\
         SELECT \
-            d.name || '/' || c.name as name,\
+            d.name || '/' || c.name as path,\
             c.checksum, \
             c.bytes \
         FROM \
@@ -454,25 +454,29 @@ function equalsByHash (options) {
             label l ON c.labelid = l.id \
         WHERE \
             l.name = ? AND \
-            c.checksum IN (\
+            path like ? || '%' AND \
+            c.checksum IN ( \
                 SELECT \
                     c2.checksum \
                 FROM \
                     catalog c2 \
                 INNER JOIN \
+                    directory d2 ON c2.directoryid = d2.id \
+                INNER JOIN \
                     label l2 on c2.labelid = l2.id \
                 WHERE \
-                    l2.name = ? \
+                    l2.name = ? AND \
+                    d2.name || '/' || c2.name  like ? || '%' \
                 GROUP BY \
                     c2.checksum \
                 HAVING \
-                    COUNT(*) > 1\
-                )\
+                    COUNT(*) > 1 \
+                ) \
         ORDER BY \
             c.bytes DESC \
         LIMIT 500")
 
-        return stmEqualsBySize.all(options.label, options.label)
+        return stmEqualsBySize.all(options.label, options.directory, options.label, options.directory)
     } catch (error) {
         throw customError(error)
     }
